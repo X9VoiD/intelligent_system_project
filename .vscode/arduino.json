@@ -1,6 +1,5 @@
 {
-    "configuration": "cpu=atmega2560",
     "board": "arduino:avr:mega",
-    "sketch": "vending_masheesh\\vending_masheesh.ino",
-    "port": "COM6"
+    "port": "COM6",
+    "sketch": "vending_masheesh\\vending_masheesh.ino"
 }
