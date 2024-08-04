@@ -66,6 +66,28 @@ const int coinSlotOnePin = 2;
 const int coinSlotFivePin = 3;
 
 const int buzzerPin = 12;
+const int testBookletServoFeedback = 31;
+
+int updateButtonStatus(int buttonPin, int *buttonState)
+{
+  int newState = digitalRead(buttonPin);
+  if (*buttonState != newState)
+  {
+    *buttonState = newState;
+    if (newState == HIGH)
+    {
+      return RISING;
+    }
+    else
+    {
+      return FALLING;
+    }
+  }
+  else
+  {
+    return newState;
+  }
+}
 
 class CoinManager
 {
@@ -200,6 +222,45 @@ public:
   }
 };
 
+class FeedbackControlledServoDispenser : public Dispenser
+{
+private:
+  Servo servo;
+  int rotationSpeed;
+  int feedbackPin;
+  int feedbackPinState;
+
+public:
+  FeedbackControlledServoDispenser(int servoPin, int rotationSpeed, int feedbackPin)
+  {
+    this->servo.attach(servoPin);
+    this->rotationSpeed = rotationSpeed;
+    this->feedbackPin = feedbackPin;
+
+    servo.write(90);
+    pinMode(feedbackPin, INPUT_PULLUP);
+    for (int i = 0; i < 5; i++) {
+      this->feedbackPinState = digitalRead(feedbackPin); // warm up
+    }
+
+    SERIAL_PRINT("Initialized Feedback-Controlled Servo (Pin ");
+    SERIAL_PRINT(servoPin);
+    SERIAL_PRINT(", Speed: ");
+    SERIAL_PRINT(rotationSpeed);
+    SERIAL_PRINTLN(")");
+  }
+
+  void dispense()
+  {
+    servo.write(rotationSpeed);
+    unsigned long now = millis();
+    while (updateButtonStatus(feedbackPin, &feedbackPinState) != RISING && millis() - now < 6000) {}
+
+    delay(50);
+    servo.write(90); // pause
+  }
+};
+
 class ServoDispenser : public Dispenser
 {
 private:
@@ -326,7 +387,6 @@ public:
         coinManager.decrement(this->cost);
         this->updateLed(this->canBeBought());
         this->dispenser->dispense();
-        delay(500);
 
         lcd.clear();
         tone(buzzerPin, C6_TONE, 200);
@@ -365,23 +425,7 @@ private:
 
   int updateButtonStatus()
   {
-    int newState = digitalRead(this->button);
-    if (this->buttonState != newState)
-    {
-      this->buttonState = newState;
-      if (newState == HIGH)
-      {
-        return RISING;
-      }
-      else
-      {
-        return FALLING;
-      }
-    }
-    else
-    {
-      return newState;
-    }
+    return ::updateButtonStatus(this->button, &this->buttonState);
   }
 };
 
@@ -430,6 +474,5 @@ private:
     return r;
   }
 };
-
 
 #endif

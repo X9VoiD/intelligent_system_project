@@ -44,10 +44,10 @@ void setup()
   SERIAL_PRINTLN();
 
   // Initialize components
-  testBooklet = Item("Test Booklet", 3, testBookletButton, testBookletLed, new ContinuousServoDispenser(testBookletServo, 100, 1000));
+  testBooklet = Item("Test Booklet", 5, testBookletButton, testBookletLed, new FeedbackControlledServoDispenser(testBookletServo, 120, testBookletServoFeedback));
   // ballPen = Item("Ballpen", 10, ballPenButton, ballPenLed, new ServoDispenser(ballPenServo, 0, 180, 1000));
-  pencil = Item("Pencil", 10, pencilButton, pencilLed, new ServoDispenser(pencilServo, 0, 180, 1000, 500, 500));
-  eraser = Item("Eraser", 8, eraserButton, eraserLed, new ServoDispenser(eraserServo, 0, 120, 1000, 10, 500));
+  pencil = Item("Pencil", 10, pencilButton, pencilLed, new ServoDispenser(pencilServo, 0, 180, 50, 500, 500));
+  eraser = Item("Eraser", 10, eraserButton, eraserLed, new ServoDispenser(eraserServo, 0, 160, 50, 10, 500));
 
   coinSlotOne = CoinSlot(coinSlotOnePin, 1);
   attachInterrupt(coinSlotOne.getInterrupt(), coinSlotOneHandler, FALLING);
